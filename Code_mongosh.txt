@@ -1,0 +1,84 @@
+                                                         Code exécuté dans mongosh : Les sorties et les captures d'écrans sont dans le rapport 
+
+Connexion :
+
+mongodb+srv://Houda:Houda123@cluster0.3hvu110.mongodb.net/test
+
+Switching to collection used :
+
+use data_valid 
+
+Showing collections :
+
+show collections
+
+Exploration des données :
+
+Détermination des principaux catégories de titres :
+
+db.data.aggregate([
+   {$group: {_id: "$categorie_titre", Total_Validation: {$sum: "$nb_vald"}}},
+   {$project: {_id: 0, categorie_titre: "$_id", Total_Validation: 1}},
+   {$sort: {Total_Validation: -1}}
+])
+
+
+Répartition des différentes catégories de titres de transport  :
+
+
+db.data.find({‘CATEGORIE_TITRE’:’NAVIGO’}).count()
+db.data.find({‘CATEGORIE_TITRE’:’IMAGINE R’}).count()
+db.data.find({‘CATEGORIE_TITRE’:’TST’}).count()
+
+
+
+Nombre de validations mois de 5 validations ( peu fréquents) :
+
+db.data.find({‘NB_VALD’:’5’}).count()
+
+Par catégorie :
+
+db.data.aggregate([
+  {$match:{NB_VALD: "5"}},
+  {$group:{_id:"$CATEGORIE_TITRE","Nb occurence \"5\"":{$sum:1}}},
+  {$sort:{"Nb occurence \"5\"":-1}}
+])
+
+
+Analyse du trafic par ligne (tramway/Bus)
+
+db.data.aggregate([
+  {
+    $group: {
+      _id: "$LIBELLE_LIGNE",
+      NB_VALD: { $sum: "$NB_VALD" }
+    }
+  },
+  { $project: { _id: 0, LIBELLE_LIGNE: "$_id", NB_VALD: 1 } },
+  { $sort: { NB_VALD: -1 } }
+])
+
+Je limite l’affichage pour les 4 premiers 
+
+db.data.aggregate([
+  {
+    $group: {
+      _id: "$LIBELLE_LIGNE",
+      NB_VALD: { $sum: "$NB_VALD" }
+    }
+  },
+  { $project: { _id: 0, LIBELLE_LIGNE: "$_id", NB_VALD: 1 } },
+  { $sort: { NB_VALD: -1 } },
+  { $limit: 4 }
+])
+
+La catégorie la plus validée dans T3a :
+
+db.data.aggregate([
+  {$match:{LIBELLE_LIGNE:’’T3a’’}},
+  {$group:{_id:"$CATEGORIE_TITRE", nb_vald:’={ $sum:’’$NB_VALD’’}}},
+  {$sort:{ nb_vald:-1}}
+])
+
+
+
